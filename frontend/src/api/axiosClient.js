@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 const axiosClient = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -17,8 +19,28 @@ axiosClient.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
+const normalizeResponseData = (data) => {
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  if (data && Array.isArray(data.value)) {
+    return data.value;
+  }
+
+  if (data && Array.isArray(data.data)) {
+    return data.data;
+  }
+
+  if (data && Array.isArray(data.items)) {
+    return data.items;
+  }
+
+  return data;
+};
+
 axiosClient.interceptors.response.use(
-  (response) => response.data,
+  (response) => normalizeResponseData(response.data),
   (error) => {
     if (error.response && error.response.status === 401) {
       // If unauthorized, clear token if expired

@@ -96,4 +96,21 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    return {
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      loading: false,
+      login: async () => { throw new Error('Auth context is not available'); },
+      register: async () => { throw new Error('Auth context is not available'); },
+      quickLogin: async () => { throw new Error('Auth context is not available'); },
+      logout: () => {},
+    };
+  }
+
+  return context;
+};
